@@ -12,9 +12,10 @@ const publicClient = createPublicClient({
 // **关键修正**: 更新函数签名以匹配 Next.js 的期望类型
 export async function GET(
   request: NextRequest, // 使用 NextRequest 类型
-  { params }: { params: { tokenId: string } }
+  context: { params: { tokenId: string } } // 将第二个参数命名为 context
 ) {
-  const tokenId = BigInt(params.tokenId);
+  const { tokenId: tokenIdString } = context.params; // 从 context 中解构 params
+  const tokenId = BigInt(tokenIdString);
 
   try {
     const gameId = await publicClient.readContract({
