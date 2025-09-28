@@ -9,7 +9,6 @@ const publicClient = createPublicClient({
   transport: http("https://evm-rpc-atlantic-2.seinetwork.io"),
 });
 
-// **最终修正**: 明确定义 context 的类型，以处理 Vercel 构建环境中的特殊情况
 type RouteContext = {
   params: {
     tokenId: string;
@@ -46,10 +45,16 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json(metadata);
 
-  } catch (error: any) {
+  } catch (error: unknown) { // **关键修正**: 将 'any' 类型改为更安全的 'unknown'
     console.error(`Error fetching metadata:`, error);
-    // 返回一个更通用的错误信息
-    return NextResponse.json({ error: 'Failed to fetch metadata', details: error.message }, { status: 500 });
+    
+    // **代码质量提升**: 增加类型检查，确保我们能安全地访问错误信息
+    let errorMessage = 'An unexpected error occurred.';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    return NextResponse.json({ error: 'Failed to fetch metadata', details: errorMessage }, { status: 500 });
   }
 }
 
