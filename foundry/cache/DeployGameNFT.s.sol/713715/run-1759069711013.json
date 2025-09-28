@@ -1,0 +1,7 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://evm-rpc-arctic-1.sei-apis.com"
+    }
+  ]
+}

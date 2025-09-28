@@ -1,0 +1,7 @@
+{
+  "transactions": [
+    {
+      "rpc": "https://sei-testnet.infura.io/v3/4c9af8aeb53e42ada6dc369f59db857e"
+    }
+  ]
+}
