@@ -6,14 +6,13 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useAccount, useWriteContract } from 'wagmi';
 import { contractConfig } from '@/lib/contracts';
-import { parseGwei } from 'viem';
+// **关键修正**: 移除了未被使用的 `parseGwei`
 
 // --- 动态导入钱包按钮 ---
 const WalletConnector = dynamic(() => import('@/components/WalletConnector'), {
   ssr: false,
   loading: () => <button disabled className="px-4 py-2 rounded-full bg-indigo-500 text-white font-semibold opacity-50 cursor-not-allowed w-[150px]">Loading...</button>
 });
-
 
 // --- 游戏卡片组件 ---
 const GameCard = ({ game, className = '', onMint }: { game: Game, className?: string, onMint: (gameId: number) => void }) => {
@@ -120,8 +119,7 @@ export default function HomePage() {
       abi: contractConfig.abi,
       functionName: 'mintGame',
       args: [BigInt(gameId)],
-      // **关键改动**: 手动设置一个 gas limit 来绕过钱包的自动预估
-      gas: BigInt(200000), // 为铸造交易提供一个 200,000 的 gas 上限
+      gas: BigInt(200000),
     });
   };
 
@@ -167,4 +165,3 @@ export default function HomePage() {
     </div>
   );
 }
-
