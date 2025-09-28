@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http } from 'viem';
 import { seiDevnet } from 'viem/chains';
 import { GAMES } from '@/lib/games';
@@ -9,15 +9,18 @@ const publicClient = createPublicClient({
   transport: http("https://evm-rpc-atlantic-2.seinetwork.io"),
 });
 
-// **关键修正**: 更新函数签名以匹配 Next.js 的期望类型
-export async function GET(
-  request: NextRequest, // 使用 NextRequest 类型
-  context: { params: { tokenId: string } } // 将第二个参数命名为 context
-) {
-  const { tokenId: tokenIdString } = context.params; // 从 context 中解构 params
-  const tokenId = BigInt(tokenIdString);
+// **最终修正**: 明确定义 context 的类型，以处理 Vercel 构建环境中的特殊情况
+type RouteContext = {
+  params: {
+    tokenId: string;
+  };
+};
 
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
+    const { tokenId: tokenIdString } = context.params;
+    const tokenId = BigInt(tokenIdString);
+
     const gameId = await publicClient.readContract({
       address: contractConfig.address,
       abi: contractConfig.abi,
@@ -43,8 +46,10 @@ export async function GET(
 
     return NextResponse.json(metadata);
 
-  } catch (error) {
-    console.error(`Error fetching metadata for token ${tokenId}:`, error);
-    return NextResponse.json({ error: 'Failed to fetch metadata' }, { status: 500 });
+  } catch (error: any) {
+    console.error(`Error fetching metadata:`, error);
+    // 返回一个更通用的错误信息
+    return NextResponse.json({ error: 'Failed to fetch metadata', details: error.message }, { status: 500 });
   }
 }
+
